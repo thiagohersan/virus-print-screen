@@ -1,0 +1,6 @@
+_site
+.sass-cache
+.DS*
+.jekyll-cache
+node_modules
+*.xcf
