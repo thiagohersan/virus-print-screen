@@ -31,7 +31,7 @@ const removeAccent = {
 };
 
 function encaseLetter(L) {
-  return `<span class="acgu-${removeAccent[L]}">${L}</span>`;
+  return `<span class="agcu-${removeAccent[L]}">${L}</span>`;
 }
 
 function escapeRegExp(text) {
@@ -40,11 +40,12 @@ function escapeRegExp(text) {
 
 function traverse(jsonObj) {
   if(jsonObj !== null && typeof jsonObj == 'object') {
+    const subObj = {};
     Object.entries(jsonObj).forEach(([key, value]) => {
-      traverse(value);
+      subObj[key]= traverse(value);
     });
+    return subObj;
   } else {
-    console.log(jsonObj);
     jsonObj = ' ' + jsonObj + ' ';
     const words = jsonObj.replace(/</g, ' <').replace(/>/g, '> ').split(' ');
 
@@ -56,7 +57,7 @@ function traverse(jsonObj) {
            mword.includes('<br>') ||
            mword.includes('target=') ||
            mword.includes('</a>') ||
-           mword.includes('<i>') ||
+           mword.includes('<i') ||
            mword.includes('</i>') ||
            mword.includes('href=')
           )) {
@@ -69,7 +70,7 @@ function traverse(jsonObj) {
       }
     }
     jsonObj = jsonObj.trim();
-    console.log(jsonObj);
+    return jsonObj;
   }
 }
 
@@ -84,5 +85,7 @@ const uniqueWords = {};
 files.forEach((fname) => {
   const mfile = fs.readFileSync(`${location}${fname}.yml`, 'utf8');
   const myml = YAML.parse(mfile);
-  traverse(myml);
+  const nyml = traverse(myml);
+  //console.log(nyml);
+  fs.writeFileSync(`${location}${fname}.agcu.yml`, YAML.stringify(nyml), 'utf8');
 });
