@@ -1,20 +1,21 @@
 const fs = require('fs');
 const YAML = require('yaml');
 
-const removeAccent = {
-  'A': 'A',
-  'À': 'A',
-  'Á': 'A',
-  'Â': 'A',
-  'Ã': 'A',
-  'Ä': 'A',
-  'G': 'G',
-  'C': 'C',
-  'U': 'U',
-  'Ù': 'U',
-  'Ú': 'U',
-  'Û': 'U',
-  'Ü': 'U',
+const removeAccentAndLower = {
+  'A': 'a',
+  'À': 'a',
+  'Á': 'a',
+  'Â': 'a',
+  'Ã': 'a',
+  'Ä': 'a',
+  'G': 'g',
+  'C': 'c',
+  'Ç': 'c',
+  'U': 'u',
+  'Ù': 'u',
+  'Ú': 'u',
+  'Û': 'u',
+  'Ü': 'u',
   'a': 'a',
   'à': 'a',
   'á': 'a',
@@ -23,6 +24,7 @@ const removeAccent = {
   'ä': 'a',
   'g': 'g',
   'c': 'c',
+  'ç': 'c',
   'u': 'u',
   'ù': 'u',
   'ú': 'u',
@@ -31,11 +33,7 @@ const removeAccent = {
 };
 
 function encaseLetter(L) {
-  return `<span class="agcu-${removeAccent[L]}">${L}</span>`;
-}
-
-function escapeRegExp(text) {
-  return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+  return `<span class="agcu-${removeAccentAndLower[L]}">${L}</span>`;
 }
 
 function traverse(jsonObj) {
@@ -48,9 +46,11 @@ function traverse(jsonObj) {
   } else {
     jsonObj = ' ' + jsonObj + ' ';
     const words = jsonObj.replace(/</g, ' <').replace(/>/g, '> ').split(' ');
+    const newPhrase = [];
 
     for(let i = 0; i < words.length; i++) {
       const mword = words[i];
+      let nword = mword;
 
       if(!(mword.includes('<a') ||
            mword.includes('class') ||
@@ -62,15 +62,17 @@ function traverse(jsonObj) {
            mword.includes('href=')
           )) {
 
-        if (/[AÀÁÂÃÄGCUÙÚÛÜaàáâãägcuùúûü]/.test(mword) && !(mword in uniqueWords)) {
-          uniqueWords[mword] = mword.replace(/([AÀÁÂÃÄGCUÙÚÛÜaàáâãägcuùúûü])/g, encaseLetter);
-          const re = new RegExp(` ${escapeRegExp(mword)} `, 'g');
-          jsonObj = jsonObj.replace(re, ` ${uniqueWords[mword]} `);
+        if(mword in uniqueWords) {
+          nword = uniqueWords[mword];
+        } else if (/[AÀÁÂÃÄGCÇUÙÚÛÜaàáâãägcçuùúûü]/.test(mword) && !(mword in uniqueWords)) {
+          uniqueWords[mword] = mword.replace(/([AÀÁÂÃÄGCÇUÙÚÛÜaàáâãägcçuùúûü])/g, encaseLetter);
+          nword = uniqueWords[mword];
+          console.log(mword + '   ' + uniqueWords[mword] + '\n');
         }
       }
+      newPhrase.push(nword);
     }
-    jsonObj = jsonObj.trim();
-    return jsonObj;
+    return newPhrase.join(' ').trim();
   }
 }
 
