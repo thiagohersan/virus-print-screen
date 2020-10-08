@@ -67,7 +67,6 @@ function traverse(jsonObj) {
         } else if (/[AÀÁÂÃÄGCÇUÙÚÛÜaàáâãägcçuùúûü]/.test(mword) && !(mword in uniqueWords)) {
           uniqueWords[mword] = mword.replace(/([AÀÁÂÃÄGCÇUÙÚÛÜaàáâãägcçuùúûü])/g, encaseLetter);
           nword = uniqueWords[mword];
-          console.log(mword + '   ' + uniqueWords[mword] + '\n');
         }
       }
       newPhrase.push(nword);
@@ -76,18 +75,14 @@ function traverse(jsonObj) {
   }
 }
 
-//const location = '../../virus-19/_data/';
-//const files = ['embody', 'flux', 'frame', 'home'];
-
-const location = './';
-const files = ['test'];
+const location = '../../virus-19/_data/';
+const files = ['embody', 'flux', 'frame', 'home'];
 
 const uniqueWords = {};
 
 files.forEach((fname) => {
-  const mfile = fs.readFileSync(`${location}${fname}.yml`, 'utf8');
+  const mfile = fs.readFileSync(`${location}original/${fname}.yml`, 'utf8');
   const myml = YAML.parse(mfile);
   const nyml = traverse(myml);
-  //console.log(nyml);
   fs.writeFileSync(`${location}${fname}.agcu.yml`, YAML.stringify(nyml), 'utf8');
 });
